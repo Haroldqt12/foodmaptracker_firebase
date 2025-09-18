@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/LOGINFORM/login.dart';
+import 'package:foodtracker_firebase/Mobile/dashboard.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,49 +14,52 @@ class _RegisterState extends State<Register> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
 
+  bool _obscurePassword = true;
   String errorMessage = "";
   bool isError = false;
 
-  @override
-  void dispose() {
-    usernameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> register() async {
-    if (passwordController.text != confirmPasswordController.text) {
-      setState(() {
-        errorMessage = "Passwords do not match";
-        isError = true;
-      });
-      return;
-    }
+  Future<void> registerUser() async {
+    // Show loading spinner
+    showDialog(
+      context: context,
+      useRootNavigator: false,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      // 1. Create user in Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
-      // Success → go to Login
+      // 2. Save user data in Firestore
+      await FirebaseFirestore.instance
+          .collection("finalproject")
+          .doc(userCredential.user!.uid)
+          .set({
+            "username": usernameController.text.trim(),
+            "email": emailController.text.trim(),
+            "createdAt": Timestamp.now(),
+            "profileImage": "", // optional placeholder
+            "phone": "", // optional placeholder
+          });
+
+      // Close loading spinner
+      Navigator.pop(context);
+
+      // Navigate to Dashboard
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Login()),
+        MaterialPageRoute(builder: (context) => const Dashboard()),
       );
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
       setState(() {
-        errorMessage = e.message ?? "An unknown error occurred";
-        isError = true;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = "An unknown error occurred";
+        errorMessage = e.message ?? "Something went wrong";
         isError = true;
       });
     }
@@ -82,141 +86,127 @@ class _RegisterState extends State<Register> {
               children: [
                 Column(
                   children: [
-                    Stack(
-                      children: [
-                        const Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Register",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              fontFamily: 'Montserrat',
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    const CircleAvatar(
-                      radius: 100,
-                      backgroundImage: AssetImage('images/foodtracker.jpg'),
-                      backgroundColor: Colors.white,
-                    ),
-                    const SizedBox(height: 50),
-
-                    // Username
-                    _buildTextField(
-                      usernameController,
-                      Icons.account_circle,
-                      "Create your Username",
+                    const Text(
+                      "Register",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 40,
+                        fontFamily: 'Montserrat',
+                        color: Colors.white,
+                      ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Email
-                    _buildTextField(
-                      emailController,
-                      Icons.email,
-                      "Email Address",
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Password
-                    _buildTextField(
-                      passwordController,
-                      Icons.lock,
-                      "Enter your Password",
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Confirm Password
-                    _buildTextField(
-                      confirmPasswordController,
-                      Icons.lock_outline,
-                      "Confirm Password",
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 30),
 
                     // Error message
                     if (isError)
                       Text(
                         errorMessage,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
                       ),
 
                     const SizedBox(height: 20),
 
-                    // Register Button
+                    // Username field
+                    TextField(
+                      controller: usernameController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.person),
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Username',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Email field
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.email),
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Password field
+                    TextField(
+                      controller: passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: 'Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Register button
                     SizedBox(
-                      width: 500,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white, width: 2),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
                           minimumSize: const Size(500, 60),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
+                            borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: register,
+                        onPressed: registerUser,
                         child: const Text(
                           "Register",
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
                             fontSize: 20,
-                            fontFamily: 'Montserrat',
-                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Go to Login
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        "Already have an account? Login",
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    TextEditingController controller,
-    IconData icon,
-    String hint, {
-    bool obscureText = false,
-  }) {
-    return SizedBox(
-      width: 500,
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        style: const TextStyle(color: Colors.black),
-        decoration: InputDecoration(
-          prefix: Icon(icon),
-          filled: true,
-          fillColor: Colors.white,
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.black54),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 18,
           ),
         ),
       ),

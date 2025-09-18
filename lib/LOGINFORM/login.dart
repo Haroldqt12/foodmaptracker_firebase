@@ -33,18 +33,22 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 
+  /// Auto navigate if already logged in
   void _navigateUser() {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+          MaterialPageRoute(
+            builder: (context) => Dashboard(userEmail: user.email),
+          ),
         );
       });
     }
   }
 
+  /// Check login credentials
   Future checkLogin(email, password) async {
     showDialog(
       context: context,
@@ -59,15 +63,19 @@ class _LoginState extends State<Login> {
         password: password,
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context); // close loading dialog
       setState(() {
         errorMessage = "";
         isError = false;
       });
 
+      // Navigate to dashboard with email
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Dashboard()),
+        MaterialPageRoute(
+          builder: (context) =>
+              Dashboard(userEmail: FirebaseAuth.instance.currentUser?.email),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
@@ -102,9 +110,9 @@ class _LoginState extends State<Login> {
                   children: [
                     Stack(
                       children: [
-                        Align(
+                        const Align(
                           alignment: Alignment.center,
-                          child: const Text(
+                          child: Text(
                             "Login",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -129,30 +137,38 @@ class _LoginState extends State<Login> {
                       ],
                     ),
                     const SizedBox(height: 30),
-                    CircleAvatar(
-                      radius: 100,
-                      backgroundImage: const AssetImage(
-                        'images/foodtracker.jpg',
+
+                    // Logo
+                    SizedBox(
+                      height: 120,
+                      width: 120,
+                      child: ClipOval(
+                        child: Image.asset(
+                          'images/foodtracker.jpg',
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      backgroundColor: Colors.white,
                     ),
+
                     const SizedBox(height: 20),
 
-                    // Show Firebase error
+                    // Firebase error message
                     if (isError)
                       Text(
                         errorMessage,
                         style: const TextStyle(color: Colors.red, fontSize: 14),
                       ),
 
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 60),
+
+                    // Email field
                     SizedBox(
                       width: 500,
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
                           filled: true,
-                          prefix: Icon(Icons.person),
+                          prefixIcon: const Icon(Icons.person),
                           fillColor: Colors.white,
                           hintText: 'Enter your Email Address',
                           hintStyle: const TextStyle(color: Colors.black54),
@@ -167,7 +183,10 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 20),
+
+                    // Password field
                     SizedBox(
                       width: 500,
                       child: TextField(
@@ -175,7 +194,7 @@ class _LoginState extends State<Login> {
                         obscureText: _obscurePassword,
                         style: const TextStyle(color: Colors.black),
                         decoration: InputDecoration(
-                          prefix: Icon(Icons.lock),
+                          prefixIcon: const Icon(Icons.lock),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -204,7 +223,10 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 50),
+
+                    // Login button
                     SizedBox(
                       width: 500,
                       child: OutlinedButton(

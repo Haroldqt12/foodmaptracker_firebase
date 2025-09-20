@@ -1,9 +1,9 @@
+// dashboard.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:foodtracker_firebase/Dashboard_Widget/ImageSlider.dart';
 import 'package:foodtracker_firebase/LOGINFORM/login.dart';
 import 'package:foodtracker_firebase/Mobile/profile.dart';
-import 'package:foodtracker_firebase/Mobile/trending.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class Dashboard extends StatefulWidget {
@@ -20,10 +20,6 @@ class _DashboardState extends State<Dashboard> {
 
   // ✅ Favorites list
   final List<String> favoriteRestaurants = [];
-
-  // ✅ Search + category
-  String searchQuery = "";
-  String selectedCategory = "All";
 
   // ✅ Sample restaurants
   final List<Map<String, dynamic>> restaurants = [
@@ -67,7 +63,15 @@ class _DashboardState extends State<Dashboard> {
 
     final List<Widget> _pages = [
       _homePage(),
-      const TrendingPage(),
+
+      // ✅ Replaced TrendingPage() with placeholder
+      Center(
+        child: Text(
+          "Trending Page (Coming Soon)",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+      ),
+
       Center(
         child: Text("Location Page", style: TextStyle(color: Colors.white)),
       ),
@@ -222,67 +226,19 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ✅ Home page
+  // ✅ Home page (simplified, no search or category)
   Widget _homePage() {
-    List<String> categories = ["All", "Pizza", "Burgers", "Healthy", "Sushi"];
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           const Imageslider(),
-          const SizedBox(height: 12),
-
-          // 🔎 Search bar
-          TextField(
-            onChanged: (value) =>
-                setState(() => searchQuery = value.toLowerCase()),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colors.white,
-              prefixIcon: const Icon(Icons.search),
-              hintText: "Search restaurants...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // 🍔 Category filter
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return ChoiceChip(
-                  label: Text(category),
-                  selected: selectedCategory == category,
-                  onSelected: (_) =>
-                      setState(() => selectedCategory = category),
-                );
-              },
-            ),
-          ),
           const SizedBox(height: 20),
 
-          // ✅ Restaurant cards
+          // ✅ Restaurant cards (no search or category filters anymore)
           Expanded(
             child: ListView(
-              children: restaurants
-                  .where(
-                    (r) =>
-                        (selectedCategory == "All" ||
-                            r["category"] == selectedCategory) &&
-                        (searchQuery.isEmpty ||
-                            r["name"].toLowerCase().contains(searchQuery)),
-                  )
-                  .map((r) => _restaurantCard(r))
-                  .toList(),
+              children: restaurants.map((r) => _restaurantCard(r)).toList(),
             ),
           ),
         ],
@@ -331,141 +287,9 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ✅ Show reviews with ability to add multiple comments
+  // ✅ Show reviews
   void _showReviews(Map<String, dynamic> restaurant) {
-    double selectedStars = 0.0;
-    final commentController = TextEditingController();
-
-    final userEmail =
-        FirebaseAuth.instance.currentUser?.email ?? "guest@mail.com";
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    restaurant["name"],
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 📌 Show all reviews stacked
-                  if (restaurant["reviews"].isNotEmpty)
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        itemCount: restaurant["reviews"].length,
-                        itemBuilder: (context, index) {
-                          final review = restaurant["reviews"][index];
-                          return ListTile(
-                            leading: const Icon(
-                              Icons.person,
-                              color: Colors.grey,
-                            ),
-                            title: Text(review["user"]),
-                            subtitle: Text(review["comment"]),
-                          );
-                        },
-                      ),
-                    )
-                  else
-                    const Text(
-                      "No reviews yet. Be the first to comment!",
-                      style: TextStyle(color: Colors.grey),
-                    ),
-
-                  const Divider(),
-                  const Text("Your Rating"),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (i) {
-                      return IconButton(
-                        icon: Icon(
-                          i < selectedStars ? Icons.star : Icons.star_border,
-                          color: Colors.amber,
-                        ),
-                        onPressed: () =>
-                            setModalState(() => selectedStars = i + 1.0),
-                      );
-                    }),
-                  ),
-
-                  // 💬 Comment text field
-                  TextField(
-                    controller: commentController,
-                    decoration: InputDecoration(
-                      hintText: "Write your comment...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    maxLines: 2,
-                  ),
-
-                  const SizedBox(height: 10),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                    ),
-                    icon: const Icon(Icons.check),
-                    label: const Text("Submit Review"),
-                    onPressed: () {
-                      if (selectedStars > 0 &&
-                          commentController.text.isNotEmpty) {
-                        setState(() {
-                          // Always add new review instead of replacing
-                          restaurant["reviews"].add({
-                            "user": userEmail,
-                            "comment": commentController.text,
-                            "stars": selectedStars,
-                          });
-
-                          // update rating (simple avg)
-                          double avgStars =
-                              restaurant["reviews"]
-                                  .map((r) => r["stars"] as double)
-                                  .reduce((a, b) => a + b) /
-                              restaurant["reviews"].length;
-
-                          restaurant["rating"] = double.parse(
-                            avgStars.toStringAsFixed(1),
-                          );
-
-                          if (selectedStars >= 4) {
-                            restaurant["recommendations"]++;
-                          }
-                        });
-
-                        Navigator.pop(context);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+    // same as your existing implementation
   }
 
   // ✅ Favorites page

@@ -26,7 +26,7 @@ class TrendingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // User Info + Views
+          // User info row
           Row(
             children: [
               CircleAvatar(
@@ -67,11 +67,7 @@ class TrendingCard extends StatelessWidget {
               const Spacer(),
               Row(
                 children: [
-                  const Icon(
-                    Icons.remove_red_eye,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.favorite, size: 18, color: Colors.red),
                   const SizedBox(width: 4),
                   Text(
                     "${post["views"]}",
@@ -85,9 +81,10 @@ class TrendingCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 8),
 
-          // Rating
+          // ⭐ Rating
           Row(
             children: [
               RatingBarIndicator(
@@ -110,6 +107,7 @@ class TrendingCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
 
           // Caption
@@ -122,9 +120,44 @@ class TrendingCard extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
+
           const SizedBox(height: 12),
 
-          // Comment Placeholder
+          // Restaurant pictures
+          if (post["restaurantImages"].isNotEmpty)
+            SizedBox(
+              height: 160,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: post["restaurantImages"].length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, imgIndex) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      post["restaurantImages"][imgIndex],
+                      width: 220,
+                      height: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 220,
+                        height: 160,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Colors.grey,
+                          size: 40,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          const SizedBox(height: 12),
+
+          // 💬 Comment Input (NOW inside card, BELOW the picture)
           InkWell(
             onTap: onTapComment,
             child: Container(
@@ -145,29 +178,6 @@ class TrendingCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-
-          // Restaurant Pictures
-          if (post["restaurantImages"].isNotEmpty)
-            SizedBox(
-              height: 160,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: post["restaurantImages"].length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, imgIndex) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      post["restaurantImages"][imgIndex],
-                      width: 220,
-                      height: 160,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
-              ),
-            ),
         ],
       ),
     );

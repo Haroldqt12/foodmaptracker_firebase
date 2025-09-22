@@ -162,6 +162,8 @@ class _TrendingsState extends State<NavTrendingPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+
+                        //for post_modal
                         onPressed: () => openPostModal(context),
                         child: const Align(
                           alignment: Alignment.centerLeft,

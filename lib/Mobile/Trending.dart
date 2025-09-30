@@ -317,22 +317,22 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem(
-                  value: "Highest First",
+                  value: "Oldest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_downward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Highest First"),
+                      Text("Oldest Posts"),
                     ],
                   ),
                 ),
                 PopupMenuItem(
-                  value: "Lowest First",
+                  value: "Newest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_upward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Lowest First"),
+                      Text("Newest Posts"),
                     ],
                   ),
                 ),

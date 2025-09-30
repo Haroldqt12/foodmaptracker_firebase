@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+<<<<<<< HEAD
 import 'package:foodtracker_firebase/Properties/trendingAsset/post_modal.dart';
 import 'package:foodtracker_firebase/Properties/trendingAsset/review_modal.dart';
+=======
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
+import 'package:foodtracker_firebase/model/Users.dart';
+>>>>>>> origin/master
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -12,7 +19,9 @@ class NavTrendingPage extends StatefulWidget {
 
 class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+<<<<<<< HEAD
   List<Map<String, dynamic>> posts = [
     {
       "username": "Alice",
@@ -109,6 +118,9 @@ class _TrendingsState extends State<NavTrendingPage> {
       "timeAgo": "1w ago",
     },
   ];
+=======
+  String sortOrder = "Highest First";
+>>>>>>> origin/master
 
   String sortOrder = "Highest First";
 
@@ -136,10 +148,14 @@ class _TrendingsState extends State<NavTrendingPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => PostModal(postController: postController),
-    );
+    ).then((_) {
+      // Refresh posts when modal closes
+      setState(() {});
+    });
   }
 
   // Open Review Modal
+<<<<<<< HEAD
   void openCommentModal(BuildContext context, int index) {
     showModalBottomSheet(
       context: context,
@@ -154,6 +170,14 @@ class _TrendingsState extends State<NavTrendingPage> {
             posts[index]["hearts"] = (posts[index]["hearts"] as int) + 1;
           });
 
+=======
+  void openCommentModal(BuildContext context, PostUser post) {
+    Widget buildReviewModal(BuildContext context) {
+      return ReviewModal(
+        postId: post.id,
+        restaurantName: "Restaurant",
+        onSubmit: (double rating, String comment) {
+>>>>>>> origin/master
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("✅ Review submitted successfully!"),
@@ -161,6 +185,235 @@ class _TrendingsState extends State<NavTrendingPage> {
             ),
           );
         },
+      );
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: buildReviewModal, // Use the separate builder function
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
+  // Toggle like status
+  Future<void> toggleLike(PostUser post) async {
+    try {
+      await _firestore.collection('posts').doc(post.id).update({
+        'isLiked': !(post.isLiked ?? false),
+        'hearts': (post.hearts ?? 0) + ((post.isLiked ?? false) ? -1 : 1),
+      });
+    } catch (e) {
+      print('Error toggling like: $e');
+    }
+  }
+
+  // Get time ago from timestamp
+  String getTimeAgo(dynamic timestamp) {
+    if (timestamp == null) return "Recently";
+
+    DateTime postTime;
+
+    // Handle both Timestamp and DateTime
+    if (timestamp is Timestamp) {
+      postTime = timestamp.toDate();
+    } else if (timestamp is DateTime) {
+      postTime = timestamp;
+    } else {
+      return "Recently";
+    }
+
+    final now = DateTime.now();
+    final difference = now.difference(postTime);
+
+    if (difference.inDays > 0) {
+      return "${difference.inDays}d ago";
+    } else if (difference.inHours > 0) {
+      return "${difference.inHours}h ago";
+    } else if (difference.inMinutes > 0) {
+      return "${difference.inMinutes}m ago";
+    } else {
+      return "Just now";
+    }
+  }
+
+  // Post Card
+  Widget trendingCard(PostUser post) {
+    // Convert rates string to double for rating
+    double rating = double.tryParse(post.rates) ?? 0.0;
+
+    // Parse images - assuming it's a single URL string, convert to list
+    List<String> restaurantImages = post.images.isNotEmpty ? [post.images] : [];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.grey[300],
+                child: const Icon(Icons.person, color: Colors.grey),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "User",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    post.location,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  Text(
+                    "Restaurant",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    getTimeAgo(post.timestamp),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: () => toggleLike(post),
+                child: Row(
+                  children: [
+                    Icon(
+                      (post.isLiked ?? false)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      size: 20,
+                      color: (post.isLiked ?? false) ? Colors.red : Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${post.hearts ?? 0}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Rating
+          Row(
+            children: [
+              RatingBarIndicator(
+                rating: rating,
+                itemBuilder: (context, index) =>
+                    const Icon(Icons.star, color: Colors.amber),
+                itemCount: 5,
+                itemSize: 20,
+                direction: Axis.horizontal,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                rating.toStringAsFixed(1),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Caption
+          Text(
+            post.description,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Restaurant Pictures
+          if (restaurantImages.isNotEmpty)
+            SizedBox(
+              height: 160,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: restaurantImages.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, imgIndex) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      restaurantImages[imgIndex],
+                      width: 220,
+                      height: 160,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 220,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
+          const SizedBox(height: 12),
+
+          // Comment input below the pictures
+          InkWell(
+            onTap: () => openCommentModal(context, post),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xfff0f0f0),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                "What's on your mind?",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black54,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -362,7 +615,10 @@ class _TrendingsState extends State<NavTrendingPage> {
               onSelected: (String newValue) {
                 setState(() {
                   sortOrder = newValue;
+<<<<<<< HEAD
                   sortPosts();
+=======
+>>>>>>> origin/master
                 });
               },
               color: Colors.white,
@@ -439,12 +695,7 @@ class _TrendingsState extends State<NavTrendingPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(
-                      "https://randomuser.me/api/portraits/men/12.jpg",
-                    ),
-                  ),
+                  const CircleAvatar(radius: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: SizedBox(
@@ -475,8 +726,82 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
             ),
 
+<<<<<<< HEAD
             // Posts
             for (int i = 0; i < posts.length; i++) trendingCard(i),
+=======
+            const SizedBox(height: 16),
+
+            // Posts from Firebase
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('posts')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.post_add, size: 50, color: Colors.grey),
+                        SizedBox(height: 10),
+                        Text(
+                          'No posts yet',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Be the first to share your food experience!',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Convert documents to PostUser objects
+                List<PostUser> posts = snapshot.data!.docs.map((doc) {
+                  Map<String, dynamic> data =
+                      doc.data() as Map<String, dynamic>;
+                  return PostUser.fromJson(data);
+                }).toList();
+
+                // Sort posts based on selection
+                if (sortOrder == "Highest First") {
+                  posts.sort((a, b) {
+                    double ratingA = double.tryParse(a.rates) ?? 0.0;
+                    double ratingB = double.tryParse(b.rates) ?? 0.0;
+                    return ratingB.compareTo(ratingA);
+                  });
+                } else {
+                  posts.sort((a, b) {
+                    double ratingA = double.tryParse(a.rates) ?? 0.0;
+                    double ratingB = double.tryParse(b.rates) ?? 0.0;
+                    return ratingA.compareTo(ratingB);
+                  });
+                }
+
+                return Column(
+                  children: posts.map((post) => trendingCard(post)).toList(),
+                );
+              },
+            ),
+>>>>>>> origin/master
           ],
         ),
       ),

@@ -1,9 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-// import 'package:foodtracker_firebase/Loginform/getstarted.dart';
+import 'package:foodtracker_firebase/Loginform/getstarted.dart';
 // import 'package:foodtracker_firebase/Mobile/dashboard.dart';
 import 'package:foodtracker_firebase/firebase_options.dart';
-import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const Mainframe(),
+      home: const Homepage(),
     );
   }
 }

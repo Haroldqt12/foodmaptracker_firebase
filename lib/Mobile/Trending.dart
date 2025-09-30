@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-<<<<<<< HEAD
-import 'package:foodtracker_firebase/Properties/trendingAsset/post_modal.dart';
-import 'package:foodtracker_firebase/Properties/trendingAsset/review_modal.dart';
-=======
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
 import 'package:foodtracker_firebase/model/Users.dart';
->>>>>>> origin/master
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -21,124 +16,12 @@ class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-<<<<<<< HEAD
-  List<Map<String, dynamic>> posts = [
-    {
-      "username": "Alice",
-      "location": "Manila, Philippines",
-      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
-      "restaurant": "Ichiran Ramen",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/1199957/pexels-photo-1199957.jpeg",
-        "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg",
-      ],
-      "caption": "Best ramen I’ve had 🍜🔥",
-      "rating": 4.7,
-      "hearts": 123,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "2h ago",
-    },
-    {
-      "username": "Bob",
-      "location": "Cebu City",
-      "profileImage": "https://randomuser.me/api/portraits/men/36.jpg",
-      "restaurant": "Lantaw Native Restaurant",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg",
-        "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
-      ],
-      "caption": "Chill vibes, good food 😋",
-      "rating": 4.3,
-      "hearts": 98,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "5h ago",
-    },
-    {
-      "username": "Carla",
-      "location": "Davao City",
-      "profileImage": "https://randomuser.me/api/portraits/women/65.jpg",
-      "restaurant": "Yellow Fin Seafood",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/4210859/pexels-photo-4210859.jpeg",
-        "https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg",
-      ],
-      "caption": "Fresh seafood, highly recommended 🐟🦐",
-      "rating": 4.8,
-      "hearts": 210,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "1d ago",
-    },
-    {
-      "username": "Daniel",
-      "location": "Quezon City",
-      "profileImage": "https://randomuser.me/api/portraits/men/22.jpg",
-      "restaurant": "Burger Shack",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/1639567/pexels-photo-1639567.jpeg",
-      ],
-      "caption": "Burgers were okay, but kinda dry 🍔",
-      "rating": 3.5,
-      "hearts": 54,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "3d ago",
-    },
-    {
-      "username": "Ella",
-      "location": "Taguig",
-      "profileImage": "https://randomuser.me/api/portraits/women/12.jpg",
-      "restaurant": "Sushi Express",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg",
-        "https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg",
-      ],
-      "caption": "Too much rice, less fish 🍣😕",
-      "rating": 2.8,
-      "hearts": 37,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "5d ago",
-    },
-    {
-      "username": "Frank",
-      "location": "Makati",
-      "profileImage": "https://randomuser.me/api/portraits/men/77.jpg",
-      "restaurant": "Pizza Town",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg",
-      ],
-      "caption": "Pizza was cold when served 🍕❄️",
-      "rating": 3.2,
-      "hearts": 80,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "1w ago",
-    },
-  ];
-=======
-  String sortOrder = "Highest First";
->>>>>>> origin/master
-
-  String sortOrder = "Highest First";
+  String sortOrder = "Oldest Posts";
 
   @override
   void dispose() {
     postController.dispose();
     super.dispose();
-  }
-
-  // Sort posts based on rating
-  void sortPosts() {
-    setState(() {
-      if (sortOrder == "Highest First") {
-        posts.sort((a, b) => (b["rating"] as double).compareTo(a["rating"]));
-      } else {
-        posts.sort((a, b) => (a["rating"] as double).compareTo(b["rating"]));
-      }
-    });
   }
 
   // Open Post Modal
@@ -155,29 +38,12 @@ class _TrendingsState extends State<NavTrendingPage> {
   }
 
   // Open Review Modal
-<<<<<<< HEAD
-  void openCommentModal(BuildContext context, int index) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => ReviewModal(
-        restaurantName: posts[index]["restaurant"],
-        onSubmit: (rating, comment) {
-          setState(() {
-            posts[index]["rating"] = rating;
-            posts[index]["comment"] = comment;
-            posts[index]["hearts"] = (posts[index]["hearts"] as int) + 1;
-          });
-
-=======
   void openCommentModal(BuildContext context, PostUser post) {
     Widget buildReviewModal(BuildContext context) {
       return ReviewModal(
         postId: post.id,
         restaurantName: "Restaurant",
         onSubmit: (double rating, String comment) {
->>>>>>> origin/master
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("✅ Review submitted successfully!"),
@@ -418,181 +284,8 @@ class _TrendingsState extends State<NavTrendingPage> {
     );
   }
 
-  // Post Card
-  Widget trendingCard(int index) {
-    final post = posts[index];
-    return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User Info + Heart
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundImage: NetworkImage(post["profileImage"]),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    post["username"],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    post["location"],
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  Text(
-                    post["restaurant"],
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    post["timeAgo"], // timeline
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    if (post["isLiked"] == true) {
-                      post["isLiked"] = false;
-                      post["hearts"] = (post["hearts"] as int) - 1;
-                    } else {
-                      post["isLiked"] = true;
-                      post["hearts"] = (post["hearts"] as int) + 1;
-                    }
-                  });
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      post["isLiked"] ? Icons.favorite : Icons.favorite_border,
-                      size: 20,
-                      color: post["isLiked"] ? Colors.red : Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${post["hearts"]}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // Rating
-          Row(
-            children: [
-              RatingBarIndicator(
-                rating: post["rating"],
-                itemBuilder: (context, index) =>
-                    const Icon(Icons.star, color: Colors.amber),
-                itemCount: 5,
-                itemSize: 20,
-                direction: Axis.horizontal,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                post["rating"].toStringAsFixed(1),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          // Caption
-          Text(
-            post["caption"],
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Restaurant Pictures
-          if (post["restaurantImages"].isNotEmpty)
-            SizedBox(
-              height: 160,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: post["restaurantImages"].length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, imgIndex) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      post["restaurantImages"][imgIndex],
-                      width: 220,
-                      height: 160,
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
-              ),
-            ),
-
-          const SizedBox(height: 12),
-
-          // Comment input below the pictures
-          InkWell(
-            onTap: () => openCommentModal(context, index),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xfff0f0f0),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "What's on your mind?",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.black54,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    sortPosts();
-
     return Scaffold(
       backgroundColor: const Color(0xff213448),
       appBar: AppBar(
@@ -615,10 +308,6 @@ class _TrendingsState extends State<NavTrendingPage> {
               onSelected: (String newValue) {
                 setState(() {
                   sortOrder = newValue;
-<<<<<<< HEAD
-                  sortPosts();
-=======
->>>>>>> origin/master
                 });
               },
               color: Colors.white,
@@ -628,22 +317,22 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem(
-                  value: "Highest First",
+                  value: "Newest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_downward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Highest First"),
+                      Text("Newest Posts"),
                     ],
                   ),
                 ),
                 PopupMenuItem(
-                  value: "Lowest First",
+                  value: "Oldest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_upward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Lowest First"),
+                      Text("Oldest Posts"),
                     ],
                   ),
                 ),
@@ -726,10 +415,6 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
             ),
 
-<<<<<<< HEAD
-            // Posts
-            for (int i = 0; i < posts.length; i++) trendingCard(i),
-=======
             const SizedBox(height: 16),
 
             // Posts from Firebase
@@ -782,7 +467,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 }).toList();
 
                 // Sort posts based on selection
-                if (sortOrder == "Highest First") {
+                if (sortOrder == "Oldest Posts") {
                   posts.sort((a, b) {
                     double ratingA = double.tryParse(a.rates) ?? 0.0;
                     double ratingB = double.tryParse(b.rates) ?? 0.0;
@@ -801,7 +486,6 @@ class _TrendingsState extends State<NavTrendingPage> {
                 );
               },
             ),
->>>>>>> origin/master
           ],
         ),
       ),

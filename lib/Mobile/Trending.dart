@@ -16,7 +16,7 @@ class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  String sortOrder = "Highest First";
+  String sortOrder = "Oldest Posts";
 
   @override
   void dispose() {
@@ -317,22 +317,22 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem(
-                  value: "Oldest Posts",
+                  value: "Newest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_downward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Oldest Posts"),
+                      Text("Newest Posts"),
                     ],
                   ),
                 ),
                 PopupMenuItem(
-                  value: "Newest Posts",
+                  value: "Oldest Posts",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_upward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Newest Posts"),
+                      Text("Oldest Posts"),
                     ],
                   ),
                 ),
@@ -467,7 +467,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 }).toList();
 
                 // Sort posts based on selection
-                if (sortOrder == "Highest First") {
+                if (sortOrder == "Oldest Posts") {
                   posts.sort((a, b) {
                     double ratingA = double.tryParse(a.rates) ?? 0.0;
                     double ratingB = double.tryParse(b.rates) ?? 0.0;

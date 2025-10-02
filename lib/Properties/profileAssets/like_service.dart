@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:foodtracker_firebase/Properties/trendingAssets/post_model.dart';
+import 'package:foodtracker_firebase/model/post_model.dart';
 
 class LikeService {
   static Future<void> toggleLike(PostModel post) async {

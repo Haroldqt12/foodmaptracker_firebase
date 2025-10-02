@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'post_model.dart';
+import '../../model/post_model.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Loginform/log_register.dart';
@@ -12,39 +11,13 @@ class NavProfilePage extends StatefulWidget {
 
 class _NavProfilePageState extends State<NavProfilePage> {
   final TextEditingController username = TextEditingController();
-
-  String? fetchedUsername = "Loading...";
-  String? fetchedEmail = "Loading...";
-
-  @override
-  void initState() {
-    super.initState();
-    fetchUserData();
-  }
+  final TextEditingController address = TextEditingController();
 
   @override
   void dispose() {
     username.dispose();
+    address.dispose();
     super.dispose();
-  }
-
-  /// Fetch user info from Firebase
-  Future<void> fetchUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(user.uid)
-          .get();
-
-      if (mounted) {
-        setState(() {
-          fetchedUsername = userDoc["username"];
-          fetchedEmail = userDoc["email"];
-        });
-      }
-    }
   }
 
   void openPostModal() {
@@ -95,7 +68,7 @@ class _NavProfilePageState extends State<NavProfilePage> {
                     ),
                   ),
 
-                  // Input Fields (Username only)
+                  // Input Fields
                   Expanded(
                     child: ListView(
                       controller: scrollController,
@@ -104,6 +77,7 @@ class _NavProfilePageState extends State<NavProfilePage> {
                         vertical: 8,
                       ),
                       children: [
+                        // Username
                         Container(
                           margin: const EdgeInsets.only(bottom: 16),
                           padding: const EdgeInsets.symmetric(
@@ -126,6 +100,38 @@ class _NavProfilePageState extends State<NavProfilePage> {
                             maxLines: 1,
                             decoration: const InputDecoration(
                               hintText: "Username",
+                              border: InputBorder.none,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF2F4A5D),
+                            ),
+                          ),
+                        ),
+
+                        // Address
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 24),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: address,
+                            maxLines: 5,
+                            decoration: const InputDecoration(
+                              hintText: "Address",
                               border: InputBorder.none,
                             ),
                             style: const TextStyle(
@@ -202,23 +208,25 @@ class _NavProfilePageState extends State<NavProfilePage> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
-                        fetchedUsername ?? "Guest",
-                        style: const TextStyle(
+                        "John Smith",
+                        style: TextStyle(
                           fontFamily: 'Montserrat',
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
-                        "Email: ${fetchedEmail ?? "Not available"}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
+                        "Age: 35",
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Address: 123 Main Street, Manila",
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                     ],
                   ),
@@ -262,8 +270,6 @@ class _NavProfilePageState extends State<NavProfilePage> {
                 ),
               ),
             ),
-
-            // Favorites Card
             Card(
               color: const Color(0xff2f4a5d),
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -286,18 +292,19 @@ class _NavProfilePageState extends State<NavProfilePage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white54,
-                  size: 18,
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white54,
+                    size: 18,
+                  ),
+                  onPressed: () {},
                 ),
                 onTap: () {
-                  // Handle favorites tap
+                  // Handle Posted tap
                 },
               ),
             ),
-
-            // Posted Card
             Card(
               color: const Color(0xff2f4a5d),
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -320,13 +327,16 @@ class _NavProfilePageState extends State<NavProfilePage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white54,
-                  size: 18,
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white54,
+                    size: 18,
+                  ),
+                  onPressed: () {},
                 ),
                 onTap: () {
-                  // Handle posted tap
+                  // Handle Posted tap
                 },
               ),
             ),
@@ -355,7 +365,10 @@ class _NavProfilePageState extends State<NavProfilePage> {
                   ),
                 ),
                 onTap: () async {
+                  // Perform Firebase logout
                   await FirebaseAuth.instance.signOut();
+
+                  // Navigate to Login screen after logout
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(

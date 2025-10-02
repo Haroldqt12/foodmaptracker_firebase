@@ -32,8 +32,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => PostModal(postController: postController),
     ).then((_) {
-      // Refresh posts when modal closes
-      setState(() {});
+      setState(() {}); // refresh when modal closes
     });
   }
 
@@ -58,13 +57,13 @@ class _TrendingsState extends State<NavTrendingPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: buildReviewModal, // Use the separate builder function
+      builder: buildReviewModal,
     ).then((value) {
       setState(() {});
     });
   }
 
-  // Toggle like status
+  // Toggle like
   Future<void> toggleLike(PostUser post) async {
     try {
       await _firestore.collection('posts').doc(post.id).update({
@@ -76,13 +75,12 @@ class _TrendingsState extends State<NavTrendingPage> {
     }
   }
 
-  // Get time ago from timestamp
+  // Format timestamp
   String getTimeAgo(dynamic timestamp) {
     if (timestamp == null) return "Recently";
 
     DateTime postTime;
 
-    // Handle both Timestamp and DateTime
     if (timestamp is Timestamp) {
       postTime = timestamp.toDate();
     } else if (timestamp is DateTime) {
@@ -105,12 +103,9 @@ class _TrendingsState extends State<NavTrendingPage> {
     }
   }
 
-  // Post Card
+  // Post Card UI
   Widget trendingCard(PostUser post) {
-    // Convert rates string to double for rating
     double rating = double.tryParse(post.rates) ?? 0.0;
-
-    // Parse images - assuming it's a single URL string, convert to list
     List<String> restaurantImages = post.images.isNotEmpty ? [post.images] : [];
 
     return Container(
@@ -126,6 +121,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --- User Info
           Row(
             children: [
               CircleAvatar(
@@ -137,20 +133,17 @@ class _TrendingsState extends State<NavTrendingPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     "User",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   Text(
                     post.location,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  Text(
+                  const Text(
                     "Restaurant",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -161,26 +154,6 @@ class _TrendingsState extends State<NavTrendingPage> {
                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () => toggleLike(post),
-                child: Row(
-                  children: [
-                    Icon(
-                      (post.isLiked ?? false)
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      size: 20,
-                      color: (post.isLiked ?? false) ? Colors.red : Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${post.hearts ?? 0}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -259,25 +232,47 @@ class _TrendingsState extends State<NavTrendingPage> {
 
           const SizedBox(height: 12),
 
-          // Comment input below the pictures
-          InkWell(
-            onTap: () => openCommentModal(context, post),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xfff0f0f0),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "What's on your mind?",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.black54,
-                  fontStyle: FontStyle.italic,
+          // --- Action Row (Heart + Comment)
+          Row(
+            children: [
+              // ❤️ Like
+              InkWell(
+                onTap: () => toggleLike(post),
+                child: Row(
+                  children: [
+                    Icon(
+                      (post.isLiked ?? false)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      size: 20,
+                      color: (post.isLiked ?? false) ? Colors.red : Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${post.hearts ?? 0}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
                 ),
               ),
-            ),
+
+              const SizedBox(width: 24),
+
+              // 💬 Comment
+              InkWell(
+                onTap: () => openCommentModal(context, post),
+                child: Row(
+                  children: const [
+                    Icon(Icons.comment, size: 20, color: Colors.grey),
+                    SizedBox(width: 4),
+                    Text(
+                      "Comment",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -459,14 +454,14 @@ class _TrendingsState extends State<NavTrendingPage> {
                   );
                 }
 
-                // Convert documents to PostUser objects
+                // Convert documents to PostUser
                 List<PostUser> posts = snapshot.data!.docs.map((doc) {
                   Map<String, dynamic> data =
                       doc.data() as Map<String, dynamic>;
                   return PostUser.fromJson(data);
                 }).toList();
 
-                // Sort posts based on selection
+                // Sort based on selection
                 if (sortOrder == "Oldest Posts") {
                   posts.sort((a, b) {
                     double ratingA = double.tryParse(a.rates) ?? 0.0;

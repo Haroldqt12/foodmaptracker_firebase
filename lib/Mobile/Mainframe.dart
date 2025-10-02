@@ -28,11 +28,12 @@ class _MainframeState extends State<Mainframe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Main background color
       backgroundColor: const Color(0xff213448),
 
-      body: pages[selectedIndex], // ✅ swap body based on index
+      // Swap body based on index
+      body: pages[selectedIndex],
 
+      // Custom bottom nav
       bottomNavigationBar: ButtomNavbar(
         selectedIndex: selectedIndex,
         onTabChange: (index) {

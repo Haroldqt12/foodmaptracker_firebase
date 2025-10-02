@@ -64,22 +64,6 @@ class PostCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const Spacer(),
-
-              // ❤️ Heart button
-              InkWell(
-                onTap: onHeartTap,
-                child: Row(
-                  children: [
-                    const Icon(Icons.favorite, size: 20, color: Colors.red),
-                    const SizedBox(width: 4),
-                    Text(
-                      "${post.hearts}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
 
@@ -117,7 +101,46 @@ class PostCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // "What's on your mind" below picture
+          // Action Row (Heart + Comment buttons)
+          Row(
+            children: [
+              // ❤️ Heart button
+              InkWell(
+                onTap: onHeartTap,
+                child: Row(
+                  children: [
+                    const Icon(Icons.favorite, size: 20, color: Colors.red),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${post.hearts}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 24),
+
+              // 💬 Comment button
+              InkWell(
+                onTap: onCommentTap,
+                child: Row(
+                  children: [
+                    const Icon(Icons.comment, size: 20, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    const Text(
+                      "Comment",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // "What's on your mind?" box (optional, can be removed if not needed)
           InkWell(
             onTap: onCommentTap,
             child: Container(

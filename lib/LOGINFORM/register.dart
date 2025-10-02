@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Loginform/log_register.dart';
 
@@ -18,6 +19,7 @@ class _RegisterState extends State<Register> {
 
   String errorMessage = "";
   bool isError = false;
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -37,12 +39,22 @@ class _RegisterState extends State<Register> {
     }
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
 
-      // Success → go to Login
+      User? user = userCredential.user;
+
+      if (user != null) {
+        // Save username to Firestore
+        await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
+          "username": usernameController.text.trim(),
+          "email": user.email,
+        });
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginDesign()),
@@ -65,7 +77,6 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xff213448), Color(0xff213448)],
@@ -83,9 +94,7 @@ class _RegisterState extends State<Register> {
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Navigator.pop(context),
                 ),
-
                 const SizedBox(height: 40),
-
                 Center(
                   child: Column(
                     children: [
@@ -105,7 +114,6 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      if (isError) const SizedBox(height: 20),
                       if (isError)
                         Text(
                           errorMessage,
@@ -115,23 +123,18 @@ class _RegisterState extends State<Register> {
                           ),
                         ),
                       const SizedBox(height: 20),
-                      // Username
                       _buildTextField(
                         usernameController,
                         Icons.account_circle,
-                        "Create your Username",
+                        "Username",
                       ),
                       const SizedBox(height: 20),
-
-                      // Email
                       _buildTextField(
                         emailController,
                         Icons.email,
                         "Email Address",
                       ),
                       const SizedBox(height: 20),
-
-                      // Password
                       _buildTextField(
                         passwordController,
                         Icons.lock,
@@ -139,8 +142,6 @@ class _RegisterState extends State<Register> {
                         obscureText: true,
                       ),
                       const SizedBox(height: 20),
-
-                      // Confirm Password
                       _buildTextField(
                         confirmPasswordController,
                         Icons.lock_outline,
@@ -148,10 +149,6 @@ class _RegisterState extends State<Register> {
                         obscureText: true,
                       ),
                       const SizedBox(height: 20),
-
-                      // Error message
-
-                      // Register Button
                       SizedBox(
                         width: double.infinity,
                         child: Container(
@@ -164,7 +161,7 @@ class _RegisterState extends State<Register> {
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: ElevatedButton(
-                            onPressed: register, // <-- your register function
+                            onPressed: register,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               minimumSize: const Size(400, 60),
@@ -173,7 +170,6 @@ class _RegisterState extends State<Register> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                                 side: const BorderSide(
-                                  // White border
                                   color: Colors.white,
                                   width: 2,
                                 ),
@@ -185,8 +181,7 @@ class _RegisterState extends State<Register> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Montserrat',
-                                color: Colors
-                                    .white, // white text fits gradient better
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -209,26 +204,23 @@ class _RegisterState extends State<Register> {
     String hint, {
     bool obscureText = false,
   }) {
-    return SizedBox(
-      width: 500,
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        style: const TextStyle(color: Colors.black),
-        decoration: InputDecoration(
-          prefix: Icon(icon),
-          filled: true,
-          fillColor: Colors.white,
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.black54),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(30),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 18,
-          ),
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.black54),
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black54),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 18,
         ),
       ),
     );
